@@ -1,0 +1,11 @@
+version: '2'
+services:
+  db:
+    image: postgres:9.6.2
+  scraper:
+    build: .
+    volumes:
+      - .:/usr/src/stock-scaper
+    depends_on:
+      - db
+    env_file: .env
