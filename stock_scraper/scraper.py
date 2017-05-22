@@ -3,14 +3,15 @@ from datetime import datetime, timedelta
 from click_datetime import Datetime
 
 DEFAULT_DATE = (datetime.utcnow().date() - timedelta(days=1)).isoformat()
-DATE_FORMAT='%Y-%m-%d'
-INDEX='index'
-SHARE='share'
-FLAGS='--noauth_local_webserver'
+DATE_FORMAT = '%Y-%m-%d'
+INDEX = 'index'
+SHARE = 'share'
+FLAGS = '--noauth_local_webserver'
 
 from stock_scraper.index import IndexService
 from stock_scraper.share import ShareService
 from stock_scraper.sheet import SheetService
+
 
 class ScraperService:
     """Core Service for managing the scraping and processing of
@@ -34,7 +35,7 @@ class ScraperService:
 
     def update_index(self, code, start_date, end_date):
         index = self.index.get(code)
-        self.index.update(index, start_date, end_date)
+        self.index.update_shares(index, start_date, end_date)
 
     def get_share(self, code):
         return self.share.get(code)
@@ -45,17 +46,27 @@ class ScraperService:
 
 @click.group()
 @click.argument('code', required=False)
-@click.option('--start-date', type=Datetime(format=DATE_FORMAT),
-              default=DEFAULT_DATE,
-              help='''Start Date of Period''')
-@click.option('--end-date', type=Datetime(format=DATE_FORMAT),
-              default=DEFAULT_DATE,
-              help='''End Date of Period''')
-@click.option('--index', 'asset', flag_value=INDEX,
-              help='''Indicate that the provided code is for an index''')
-@click.option('--share', 'asset', flag_value=SHARE,
-              help='''Indicates that the provided code is for an share''',
-              default=True)
+@click.option(
+    '--start-date',
+    type=Datetime(format=DATE_FORMAT),
+    default=DEFAULT_DATE,
+    help='''Start Date of Period''')
+@click.option(
+    '--end-date',
+    type=Datetime(format=DATE_FORMAT),
+    default=DEFAULT_DATE,
+    help='''End Date of Period''')
+@click.option(
+    '--index',
+    'asset',
+    flag_value=INDEX,
+    help='''Indicate that the provided code is for an index''')
+@click.option(
+    '--share',
+    'asset',
+    flag_value=SHARE,
+    help='''Indicates that the provided code is for an share''',
+    default=True)
 def main(code, start_date, end_date, asset):
     """Stock Scraper pulls end of day data and index information from a
     Google Sheet and stores it in a database. Code is the index or

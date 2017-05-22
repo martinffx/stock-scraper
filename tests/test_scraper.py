@@ -2,16 +2,16 @@ import unittest
 import unittest.mock as mock
 
 from stock_scraper.scraper import ScraperService, DEFAULT_DATE
-from stock_scraper.index import IndexService, IndexRecord
-from stock_scraper.share import ShareService, ShareRecord
+from stock_scraper.index import IndexService
+from stock_scraper.share import ShareService
+from stock_scraper.schema import Share, Index
+
 
 class ScraperServiceTest(unittest.TestCase):
-
     def setUp(self):
         self.share = mock.create_autospec(ShareService)
         self.index = mock.create_autospec(IndexService)
         self.service = ScraperService(self.index, self.share)
-
 
     def test_list_indexes(self):
         self.index.list = mock.Mock(return_value=[[]])
@@ -21,26 +21,27 @@ class ScraperServiceTest(unittest.TestCase):
         self.assertEqual(len(indexes), 1)
 
     def test_get_index(self):
-        index_record = mock.create_autospec(IndexRecord)
+        index_record = mock.create_autospec(Index)
         self.index.get = mock.Mock(return_value=index_record)
 
         index = self.service.get_index('CODE')
-        self.assertIsInstance(index, IndexRecord)
+        self.assertIsInstance(index, Index)
 
     def test_update_index(self):
-        index = mock.create_autospec(IndexRecord)
+        index = mock.create_autospec(Index)
         self.index.get = mock.Mock(return_value=index)
 
         self.service.update_index('CODE', DEFAULT_DATE, DEFAULT_DATE)
-        self.index.update.assert_called_with(index, DEFAULT_DATE, DEFAULT_DATE)
+        self.index.update_shares.assert_called_with(index, DEFAULT_DATE,
+                                                    DEFAULT_DATE)
         self.index.get.assert_called_with('CODE')
 
     def test_get_share(self):
-        share_record = mock.create_autospec(ShareRecord)
+        share_record = mock.create_autospec(Share)
         self.share.get = mock.Mock(return_value=share_record)
 
         share = self.service.get_share('CODE')
-        self.assertIsInstance(share, ShareRecord)
+        self.assertIsInstance(share, Share)
         self.share.get.assert_called_with('CODE')
 
     def test_update_share(self):

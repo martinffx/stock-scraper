@@ -3,59 +3,67 @@ import unittest.mock as mock
 import requests_mock
 import json
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from nose.tools import set_trace
 
 from stock_scraper.scraper import DEFAULT_DATE
-from stock_scraper.index import IndexService, IndexRecord
+from stock_scraper.index import IndexService
+from stock_scraper.schema import Index, Share, Base
 from stock_scraper.sheet import SheetService
-from stock_scraper.share import ShareService, ShareRecord
+from stock_scraper.share import ShareService
+
 
 class IndexServiceTest(unittest.TestCase):
 
+    engine = create_engine('sqlite:///:memory:')
+    Session = sessionmaker(bind=engine)
+    sheet = mock.create_autospec(SheetService)
+    share = mock.create_autospec(ShareService)
+    session = Session()
+    service = IndexService(sheet, share, session)
+
     def setUp(self):
-        self.sheet = mock.create_autospec(SheetService)
-        self.share = mock.create_autospec(ShareService)
-        self.service = IndexService(self.sheet, self.share)
+        Base.metadata.create_all(self.engine)
 
+    def tearDown(self):
+        Base.metadata.drop_all(self.engine)
 
-    def test_list(self):
-        self.sheet.get_values = mock.Mock(return_value={'values':
-                                                        [['', '', '', ''],
-                                                         ['', '', '', '']]})
+    def test_update_index_from_sheet(self):
+        self.sheet.get_values = mock.Mock(
+            return_value={'values': [['', 'xx', '', ''], ['', 'yy', '', '']]})
+        self.service.update()
 
-        indexes = self.service.list()
-        for index in indexes:
-            self.assertIsInstance(index, IndexRecord)
+    def test_update_index_constituents(self):
+        index = Index.build([
+            'FTSE 100 Index', 'FTSE:FSI', 6,
+            'https://markets.ft.com/data/indices/ajax/getindexconstituents?xid=572009&pagenum='
+        ])
+        fixture = os.path.join(
+            os.path.dirname(__file__), 'fixtures/index_shares.json')
+
+        with open(fixture, 'r') as f:
+            rs = json.load(f)
+
+        self.share.get = mock.Mock(return_value=[])
+        with requests_mock.Mocker() as m:
+            [
+                m.get(index.url + str(x), json=rs)
+                for x in range(1, index.pages + 1)
+            ]
+            self.service.update_constituents(index)
+
+    def test_update_index_shares(self):
+        pass
 
     def test_get_from_code(self):
-        self.sheet.get_values = mock.Mock(return_value={'values':
-                                                        [['', 'xx', '', ''],
-                                                         ['', 'yy', '', '']]})
+        self.session.add(Index.build(['', 'xx', '', '']))
+        self.session.commit()
 
         index = self.service.get('xx')
         self.assertEqual('xx', index.code)
 
     def test_get_from_missing_code(self):
-        self.sheet.get_values = mock.Mock(return_value={'values':
-                                                        [['', 'xx', '', ''],
-                                                         ['', 'yy', '', '']]})
-
         index = self.service.get('zz')
         self.assertEqual(IndexService.NULL_RECORD, index)
-
-    def test_update_none_should_raise_value_error(self):
-        with self.assertRaises(ValueError):
-            self.service.update(None, DEFAULT_DATE, DEFAULT_DATE)
-
-    def test_update_null_should_return(self):
-        self.service.update(IndexService.NULL_RECORD, DEFAULT_DATE, DEFAULT_DATE)
-
-
-    def test_update_with_index(self):
-        index = IndexRecord(['FTSE 100 Index', 'FTSE:FSI', 6, 'https://markets.ft.com/data/indices/ajax/getindexconstituents?xid=572009&pagenum='])
-        fixture = os.path.join(
-            os.path.dirname(__file__), 'fixtures/index_shares.json')
-        with open(fixture, 'r') as f:
-            rs = json.load(f)
-        with requests_mock.Mocker() as m:
-            [m.get(index.url + str(x), json=rs) for x in range(1,index.pages+1)]
-            self.service.update(index, DEFAULT_DATE, DEFAULT_DATE)
