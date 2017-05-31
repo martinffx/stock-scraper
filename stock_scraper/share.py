@@ -1,24 +1,17 @@
 from stock_scraper.schema import Index, Share
 
 
-class ShareRepository:
-    def __init__(self):
-        pass
-
-    def save(self, share):
-        pass
-
-
 class ShareService:
     """Manage share information"""
 
-    def __init__(self, share_repo, price_service):
-        self.repo = share_repo
+    def __init__(self, price_service, session):
         self.price = price_service
+        self.session = session
 
     def save(self, share):
-        self.repo.save(share)
+        self.session.add(share)
+        self.session.commit()
 
     def update(self, share, start_date, end_date):
-        data = self.price.get(share, start_date, end_date)
+        data = self.price.get_data(share, start_date, end_date)
         self.price.save(data)

@@ -5,6 +5,7 @@ import json
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from test import DBTestCase
 
 from nose.tools import set_trace
 
@@ -15,20 +16,12 @@ from stock_scraper.sheet import SheetService
 from stock_scraper.share import ShareService
 
 
-class IndexServiceTest(unittest.TestCase):
-
-    engine = create_engine('sqlite:///:memory:')
-    Session = sessionmaker(bind=engine)
-    sheet = mock.create_autospec(SheetService)
-    share = mock.create_autospec(ShareService)
-    session = Session()
-    service = IndexService(sheet, share, session)
-
+class IndexServiceTest(DBTestCase):
     def setUp(self):
-        Base.metadata.create_all(self.engine)
-
-    def tearDown(self):
-        Base.metadata.drop_all(self.engine)
+        super(IndexServiceTest, self).setUp()
+        self.sheet = mock.create_autospec(SheetService)
+        self.share = mock.create_autospec(ShareService)
+        self.service = IndexService(self.sheet, self.share, self.session)
 
     def test_update_index_from_sheet(self):
         self.sheet.get_values = mock.Mock(

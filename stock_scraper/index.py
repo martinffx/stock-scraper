@@ -4,7 +4,6 @@ import json
 
 from stock_scraper.schema import Share, Index
 
-INDEX_SHEET = '10sHdXR_NyQ-hxrEu7QALDX5qwuLWjCAfENSh2c3Cka4'
 INDEX_RANGE = 'Index!A2:D'
 
 
@@ -50,7 +49,6 @@ class IndexService:
         shares = self.share.get(index=index)
         for share in shares:
             self.share.update(share, start_date, end_date)
-        pass
 
     def __get_page(self, index, page):
         result = requests.get(index.url + '1')
@@ -59,7 +57,7 @@ class IndexService:
         return [Share.build(row, index) for row in rows]
 
     def __list(self):
-        result = self.sheet.get_values(INDEX_SHEET, INDEX_RANGE)
+        result = self.sheet.get_values(INDEX_RANGE)
         values = result.get('values', [])
 
         if not values:
