@@ -42,10 +42,10 @@ The easiest way to get started is to with this right now is to checkout the code
 - [x] Save index data into database
 - [x] Fetch index constituents
 - [x] Save share data in database
-- [] Fetch price data from sheet
-- [] Save price data
-- [] Parallelize scraping
-- [] Setup CI to build and publish a docker image
+- [ ] Fetch price data from sheet
+- [ ] Save price data
+- [ ] Parallelize scraping
+- [ ] Setup CI to build and publish a docker image
 
 [1]: https://markets.ft.com/data/indices/tearsheet/constituents?s=FTSE:FSI
 [2]: https://docs.google.com/spreadsheets/d/10sHdXR_NyQ-hxrEu7QALDX5qwuLWjCAfENSh2c3Cka4/edit#gid=0
