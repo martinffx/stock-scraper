@@ -20,12 +20,14 @@ class ScraperService:
         """Fetch list of available indexes from the Google Sheet."""
         return self.index.list()
 
-    def get_index(self, code):
-        return self.index.get(code)
+    def update_index(self, index):
+        """Takes in the index object, saves it to the database and
+        updates all it's constituent shares"""
+        self.index.save(index)
+        self.index.update_shares(index)
 
-    def update_index(self, code, start_date, end_date):
-        index = self.index.get(code)
-        self.index.update_shares(index, start_date, end_date)
+    def update_index_and_price(self, code, start_date, end_date):
+        self.index.update_shares_and_price(code, start_date, end_date)
 
     def get_share(self, code):
         return self.share.get(code)

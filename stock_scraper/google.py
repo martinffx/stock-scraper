@@ -1,19 +1,19 @@
-import httplib2
-import os
-
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
-from oauth2client.file import Storage
+import argparse
 import json
+import os
 import os.path
 
+import httplib2
+from apiclient import discovery
+from oauth2client import client, tools
+from oauth2client.file import Storage
+
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
-CLIENT_SECRET_FILE = './client_secret.json'
-APPLICATION_NAME = 'Google Sheets API Python Quickstart'
-CREDENTIALS_DIR = './.credentials'
-CREDENTIALS = 'sheets.googleapis.com-python-quickstart.json'
+CLIENT_SECRET_FILE = 'client_secret.json'
+APPLICATION_NAME = 'STOCKS'
 SHEET_ID = '10sHdXR_NyQ-hxrEu7QALDX5qwuLWjCAfENSh2c3Cka4'
+CREDENTIALS = 'sheets.googleapis.com-python-quickstart.json'
+CREDENTIALS_DIR = '.credentials'
 
 
 def create_secrets_file():
@@ -44,14 +44,10 @@ def create_secrets_file():
         json.dump(secret_json, fp)
 
 
-import pdb
-
-
 class SheetService:
-    def __init__(self, http, flags):
-        if http is None:
-            http = httplib2.Http()
-        self.http = http
+    def __init__(self, home_dir, flags):
+        self.http = httplib2.Http()
+        self.home_dir = home_dir
         self.service = self.get_service(flags)
 
     def get_values(self, range):
@@ -73,20 +69,22 @@ class SheetService:
         Returns:
             Credentials, the obtained credential.
         """
-        credential_dir = os.path.join(CREDENTIALS_DIR)
+        credential_dir = os.path.join(self.home_dir, CREDENTIALS_DIR)
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
         credential_path = os.path.join(credential_dir, CREDENTIALS)
         create_secrets_file()
 
-        pdb.set_trace()
         store = Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+            secrets_file = os.path.join(self.home_dir, CLIENT_SECRET_FILE)
+            flow = client.flow_from_clientsecrets(secrets_file, SCOPES)
             flow.user_agent = APPLICATION_NAME
             if flags:
-                credentials = tools.run_flow(flow, store, flags)
+                flags_args = argparse.ArgumentParser(
+                    parents=[tools.argparser]).parse_args([flags])
+                credentials = tools.run_flow(flow, store, flags_args)
             else:  # Needed only for compatibility with Python 2.6
                 credentials = tools.run(flow, store)
             print('Storing credentials to ' + credential_path)
