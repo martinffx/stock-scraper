@@ -2,6 +2,15 @@ version: '2'
 services:
   db:
     image: postgres:9.6.2
+    environment:
+      POSTGRES_USER: stocks
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: stocks
+      PGDATA: /var/lib/postgresql/data/stocks
+    volumes:
+      - ./.data:/var/lib/postgresql/data/stocks
+    ports:
+      - 5432:5432
   scraper:
     build: .
     volumes:
@@ -9,3 +18,5 @@ services:
     depends_on:
       - db
     env_file: .env
+    environment:
+      DATABASE_URL: postgres://stocks:password@db:5432/stocks

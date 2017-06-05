@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Time, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 Base = declarative_base()
 
@@ -9,11 +9,16 @@ Base = declarative_base()
 class Index(Base):
     __tablename__ = 'indexes'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(UUID, primary_key=True)
+    exchange = Column(String(5))
+    symbol = Column(String(5))
     name = Column(String(255))
-    code = Column(String(5))
     pages = Column(Integer)
     url = Column(String(1000))
+    open = Column(Time(True))
+    close = Column(Time(True))
+    first_valid = Column(DateTime(True))
+    last_valid = Column(DateTime(True))
 
     @classmethod
     def build(cls, row):
