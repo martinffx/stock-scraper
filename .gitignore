@@ -1,6 +1,8 @@
 *_secret.json
 .credentials/
 .data/
+*.xml
+venv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

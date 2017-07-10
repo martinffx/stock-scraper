@@ -1,18 +1,19 @@
+import logging
 import click
 import os
 from datetime import datetime, timedelta
 from click_datetime import Datetime
-from stock_scraper.service import IndexService, ShareService, PriceService
-from stock_scraper.google import SheetService
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from stock_scraper.services.index import (update_indexes, update_index,
+                                          fetch_update_security, DATE_FORMAT)
 
 DEFAULT_DATE = (datetime.utcnow().date() - timedelta(days=1)).isoformat()
-DATE_FORMAT = '%Y-%m-%d'
 INDEX = 'index'
 SHARE = 'share'
-FLAGS = '--noauth_local_webserver'
+
 ROOT = os.path.dirname(__file__)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @click.argument('code', required=False)
@@ -37,44 +38,31 @@ ROOT = os.path.dirname(__file__)
     flag_value=SHARE,
     help='''Indicates that the provided code is for an share''',
     default=True)
-@click.option(
-    '--database-url',
-    'database_url',
-    default=None,
-    help='''database to store results in, defaults to DATABASE_URL
-    environment variable''')
 @click.command()
-def main(code, start_date, end_date, asset, database_url):
+def main(code, start_date, end_date, asset):
     """Stock Scraper pulls end of day data and index information from a
     Google Sheet and stores it in a database. Code is the index or
     share code to pull data for, if the index switch is passed all shares for
     that index is updated. If no code is provided all shares in all
     indexes will be updated."""
-    home_dir = os.path.abspath(ROOT)
-    if database_url is None:
-        database_url = os.environ['DATABASE_URL']
-
-    engine = create_engine(database_url)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    sheet = SheetService(home_dir, FLAGS)
-    price = PriceService(sheet, session)
-    share = ShareService(price, session)
-    index = IndexService(sheet, share)
 
     if code is None:
-        index.update_with_shares()
+        logger.info('update with shares')
+        update_indexes(start_date, end_date)
         return
 
     if asset == INDEX:
-        index.update_index(code)
+        logger.info('update index')
+        update_index(code, start_date, end_date)
         return
 
     if asset == SHARE:
-        share.update_share(code)
+        logger.info('update share')
+        fetch_update_security(code, start_date, end_date)
         return
 
 
 if __name__ == '__main__':
+    handler = logging.FileHandler(os.environ['ENV'] + '.log')
+    logging.getLogger(__name__).addHandler(handler)
     main()

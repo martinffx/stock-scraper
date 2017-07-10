@@ -11,12 +11,37 @@ services:
       - ./.data:/var/lib/postgresql/data/stocks
     ports:
       - 5432:5432
+  mq:
+    image: rabbitmq:3.6.10-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: stock
+    ports:
+      - 15672:15672
+      - 5672:5672
+  worker:
+    build: .
+    command: celery -A stock_scraper.tasks worker --loglevel=debug
+    volumes:
+      - .:/usr/src/stock-scaper
+    depends_on:
+      - db
+      - mq
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://stocks:password@db:5432/stocks
+      RABBITMQ_URL: amqp://rabbit:stock@mq:5672
+      GOOGLE_CREDENTIALS: /usr/src/stock-scaper
+      ENV: development
   scraper:
     build: .
     volumes:
       - .:/usr/src/stock-scaper
     depends_on:
-      - db
+      - worker
     env_file: .env
     environment:
       DATABASE_URL: postgres://stocks:password@db:5432/stocks
+      RABBITMQ_URL: amqp://rabbit:stock@mq:5672
+      GOOGLE_CREDENTIALS: /usr/src/stock-scaper
+      ENV: development
