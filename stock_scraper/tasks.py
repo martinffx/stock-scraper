@@ -11,4 +11,4 @@ app.conf.update(
     result_serializer='json',
     enable_utc=True,
     broker_url=os.environ['RABBITMQ_URL'],
-    imports=['stock_scraper.services.index'])
+    imports=['stock_scraper.service'])

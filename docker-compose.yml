@@ -19,6 +19,13 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
+  proxy:
+    image: mattes/rotating-proxy
+    ports:
+      - 5566:5566
+      - 4444:4444
+    environment:
+      tor: 25
   worker:
     build: .
     command: celery -A stock_scraper.tasks worker --loglevel=debug
@@ -27,12 +34,15 @@ services:
     depends_on:
       - db
       - mq
+      - proxy
     env_file: .env
     environment:
       DATABASE_URL: postgres://stocks:password@db:5432/stocks
       RABBITMQ_URL: amqp://rabbit:stock@mq:5672
       GOOGLE_CREDENTIALS: /usr/src/stock-scaper
       ENV: development
+      HTTP_PROXY: http://proxy:5566
+      HTTPS_PROXY: http://proxy:5566
   scraper:
     build: .
     volumes:
@@ -45,3 +55,5 @@ services:
       RABBITMQ_URL: amqp://rabbit:stock@mq:5672
       GOOGLE_CREDENTIALS: /usr/src/stock-scaper
       ENV: development
+      HTTP_PROXY: http://proxy:5566
+      HTTPS_PROXY: http://proxy:5566

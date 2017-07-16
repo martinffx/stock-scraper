@@ -7,6 +7,7 @@ index = Table('index', meta,
               Column('exchange', String(10), nullable=False),
               Column('code', String(10), nullable=False),
               Column('name', String(255), nullable=False),
+              Column('provider', String(10), nullable=False),
               Column('ccy', String(3), nullable=False),
               Column('price_divisor', Float, nullable=False),
               Column('separator', String(5), nullable=False),
@@ -23,7 +24,7 @@ security = Table('security', meta,
                  Column('code', String(20), nullable=False),
                  Column('name', String(255), nullable=False),
                  Column('ccy', String(3), nullable=False),
-                 Column('price_divisor', Integer, nullable=False),
+                 Column('price_divisor', Float, nullable=False),
                  PrimaryKeyConstraint(
                      'exchange_code', 'code', name='security_pk'))
 

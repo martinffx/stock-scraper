@@ -1,3 +1,4 @@
+import pdb
 import logging
 import json
 from datetime import datetime
@@ -39,6 +40,7 @@ class IndexRecord(Record):
                    Column('exchange', String(10), nullable=False),
                    Column('code', String(10), nullable=False),
                    Column('name', String(255), nullable=False),
+                   Column('provider', String(10), nullable=False),
                    Column('ccy', String(3), nullable=False),
                    Column('price_divisor', Float, nullable=False),
                    Column('separator', String(5), nullable=False),
@@ -54,6 +56,7 @@ class IndexRecord(Record):
                  exchange=None,
                  name=None,
                  code=None,
+                 provider=None,
                  ccy=None,
                  price_divisor=None,
                  separator=None,
@@ -66,6 +69,7 @@ class IndexRecord(Record):
         self.exchange = exchange
         self.name = name
         self.code = code
+        self.provider = provider
         self.ccy = ccy
         self.price_divisor = price_divisor
         self.separator = separator
@@ -81,6 +85,7 @@ class IndexRecord(Record):
             'exchange': self.exchange,
             'name': self.name,
             'code': self.code,
+            'provider': self.provider,
             'ccy': self.ccy,
             'price_divisor': self.price_divisor,
             'separator': self.separator,
@@ -98,15 +103,16 @@ class IndexRecord(Record):
             exchange=row[2],
             name=row[0],
             code=row[1],
-            ccy=row[3],
-            price_divisor=float(row[4]),
-            separator=row[5],
-            open=get_time(row[6]),
-            close=get_time(row[7]),
-            lunch_start=get_time(row[8]),
-            lunch_end=get_time(row[9]),
-            pages=int(row[10]),
-            url=row[11])
+            provider=row[3],
+            ccy=row[4],
+            price_divisor=float(row[5]),
+            separator=row[6],
+            open=get_time(row[7]),
+            close=get_time(row[8]),
+            lunch_start=get_time(row[9]),
+            lunch_end=get_time(row[10]),
+            pages=int(row[11]),
+            url=row[12])
 
     @classmethod
     def build_from_repo(cls, repo):
@@ -114,15 +120,16 @@ class IndexRecord(Record):
             exchange=repo[0],
             code=repo[1],
             name=repo[2],
-            ccy=repo[3],
-            price_divisor=repo[4],
-            separator=repo[5],
-            open=repo[6],
-            close=repo[7],
-            lunch_start=repo[8],
-            lunch_end=repo[9],
-            pages=repo[10],
-            url=repo[11])
+            provider=repo[3],
+            ccy=repo[4],
+            price_divisor=repo[5],
+            separator=repo[6],
+            open=repo[7],
+            close=repo[8],
+            lunch_start=repo[9],
+            lunch_end=repo[10],
+            pages=repo[11],
+            url=repo[12])
 
     @classmethod
     def build_from_json(cls, data):
@@ -132,6 +139,7 @@ class IndexRecord(Record):
             exchange=data['exchange'],
             code=data['code'],
             name=data['name'],
+            provider=data['provider'],
             ccy=data['ccy'],
             price_divisor=data['price_divisor'],
             separator=data['separator'],

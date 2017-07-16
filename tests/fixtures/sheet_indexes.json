@@ -1,0 +1,12 @@
+[
+  [
+    "FTSE 100 Index", "FTSE:FSI", "LON", "NONE", "GBP", "0.01", ":",
+    "08:00:00 UTC","16:30:00 UTC", "", "", "6",
+    "https://markets.ft.com/data/indices/ajax/getindexconstituents?xid=572009&pagenum="
+  ],
+  [
+    "S&P 500 INDEX", "INX:IOM", "NYSE", "GOOGLE", "USD", "0.01", ":",
+    "14:30:00 UTC", "21:00:00 UTC", "", "", "26",
+    "https://markets.ft.com/data/indices/ajax/getindexconstitnuents?xid=575769&pagenum="
+  ]
+]

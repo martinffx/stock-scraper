@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Repository:
     NULL_INDEX = IndexRecord()
+    NULL_SECURITY = SecurityRecord()
 
     def __init__(self, database_url):
         self.log = logging.getLogger('repository')
@@ -47,6 +48,7 @@ class Repository:
                      SecurityIndexRecord.schema.c.index_exchange))
         logger.info(query)
         results = self.__list(query)
+        results = [result for result in results]
         return [SecurityRecord.build_from_repo(result) for result in results]
 
     def get_security(self, exchange, code):

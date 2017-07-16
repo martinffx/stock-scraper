@@ -3,8 +3,8 @@ import click
 import os
 from datetime import datetime, timedelta
 from click_datetime import Datetime
-from stock_scraper.services.index import (update_indexes, update_index,
-                                          fetch_update_security, DATE_FORMAT)
+from stock_scraper.service import (update_indexes, update_index,
+                                   fetch_update_security, DATE_FORMAT)
 
 DEFAULT_DATE = (datetime.utcnow().date() - timedelta(days=1)).isoformat()
 INDEX = 'index'
